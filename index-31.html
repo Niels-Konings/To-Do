@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TAAK</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --surface3: #22222f;
+  --border: #2a2a3a;
+  --accent: #7c6fff;
+  --accent2: #ff6f91;
+  --accent3: #6fffc8;
+  --text: #f0f0f8;
+  --text2: #9090b0;
+  --text3: #5050708;
+  --green: #4ade80;
+  --orange: #fb923c;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --nav-h: 64px;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+/* ---- HEADER ---- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(10,10,15,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.xp-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--yellow);
+}
+
+.xp-pill span { font-family: 'Syne', sans-serif; font-weight: 700; }
+
+/* ---- NAV ---- */
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: rgba(10,10,15,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.nav-btn.active { color: var(--accent); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* ---- MAIN ---- */
+main {
+  padding: 16px 16px calc(var(--nav-h) + 16px);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ---- SECTIONS ---- */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ---- DATE HEADER ---- */
+.date-group { margin-bottom: 24px; }
+
+.date-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--surface3);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent3));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ---- TASK CARD ---- */
+.task-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s, opacity 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.task-card.done { opacity: 0.45; }
+.task-card.done .task-title { text-decoration: line-through; color: var(--text2); }
+
+.task-card.from-deadline {
+  border-left: 3px solid var(--accent2);
+}
+
+.task-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.check-btn {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-top: 1px;
+}
+
+.check-btn.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.check-btn svg { width: 12px; height: 12px; color: white; }
+
+.task-info { flex: 1; min-width: 0; }
+
+.task-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.priority-hoog { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.priority-normaal { background: rgba(124,111,255,0.12); color: var(--accent); border: 1px solid rgba(124,111,255,0.25); }
+.priority-laag { background: rgba(144,144,176,0.12); color: var(--text2); border: 1px solid var(--border); }
+
+.task-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text2);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn:hover { color: var(--text); background: var(--surface3); }
+
+.task-note {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  line-height: 1.5;
+}
+
+/* ---- SUBTASKS ---- */
+.subtasks {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.subtask-check {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border);
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.subtask-check.checked { background: var(--accent3); border-color: var(--accent3); }
+.subtask-check svg { width: 10px; height: 10px; color: #000; }
+
+.subtask-label {
+  font-size: 12px;
+  color: var(--text2);
+  flex: 1;
+}
+
+.subtask-label.done { text-decoration: line-through; opacity: 0.5; }
+
+/* ---- DEADLINE CARD ---- */
+.deadline-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.deadline-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+
+.dl-green { background: var(--green); }
+.dl-orange { background: var(--orange); }
+.dl-red { background: var(--red); }
+.dl-grey { background: var(--text2); }
+
+.deadline-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-left: 8px;
+}
+
+.deadline-info { flex: 1; min-width: 0; }
+
+.deadline-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.deadline-countdown {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.deadline-workdays {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ---- REMINDER CARD ---- */
+.reminder-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---- ADD BUTTON ---- */
+.add-fab {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(124,111,255,0.4);
+  z-index: 40;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.add-fab:active { transform: scale(0.92); box-shadow: 0 2px 10px rgba(124,111,255,0.3); }
+.add-fab svg { width: 24px; height: 24px; }
+
+/* ---- MODAL ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 24px 20px 32px;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.field { margin-bottom: 16px; }
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 7px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus { border-color: var(--accent); }
+
+.field textarea { resize: vertical; min-height: 72px; }
+
+.field select option { background: var(--surface2); }
+
+.color-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-dot.selected { border-color: white; transform: scale(1.15); }
+
+.subtask-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.subtask-add-row input { flex: 1; }
+
+.btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; margin-top: 6px; }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); margin-top: 8px; }
+.btn-sm {
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ---- EMPTY STATE ---- */
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text2);
+}
+
+.empty-state svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+
+/* ---- SECTION TITLE ---- */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.section-head h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* ---- SHARE TOAST ---- */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 80px);
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---- CONFETTI ---- */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 300;
+}
+
+/* ---- XP POPUP ---- */
+.xp-popup {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 80px);
+  right: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--yellow);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--yellow);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.xp-popup.show { opacity: 1; transform: translateY(0); }
+
+/* ---- COLOR LABEL DOT ---- */
+.color-label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.recurring-badge {
+  font-size: 10px;
+  color: var(--accent3);
+  border: 1px solid rgba(111,255,200,0.3);
+  background: rgba(111,255,200,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.expired-badge {
+  font-size: 10px;
+  color: var(--red);
+  border: 1px solid rgba(248,113,113,0.3);
+  background: rgba(248,113,113,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.deadline-badge {
+  font-size: 10px;
+  color: var(--accent2);
+  border: 1px solid rgba(255,111,145,0.3);
+  background: rgba(255,111,145,0.08);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-title">TAAK</div>
+  <div class="xp-pill">⚡ <span id="xp-display">0</span> XP</div>
+</header>
+
+<main>
+  <!-- DAG SECTION -->
+  <section class="section active" id="sec-dag">
+    <div id="dag-content"></div>
+  </section>
+
+  <!-- DEADLINES SECTION -->
+  <section class="section" id="sec-deadlines">
+    <div id="deadline-content"></div>
+  </section>
+
+  <!-- REMINDERS SECTION -->
+  <section class="section" id="sec-reminders">
+    <div id="reminder-content"></div>
+  </section>
+</main>
+
+<nav class="nav">
+  <button class="nav-btn active" id="nav-dag" onclick="switchTab('dag')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    DAG
+  </button>
+  <button class="nav-btn" id="nav-deadlines" onclick="switchTab('deadlines')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    DEADLINES
+  </button>
+  <button class="nav-btn" id="nav-reminders" onclick="switchTab('reminders')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    REMINDERS
+  </button>
+</nav>
+
+<button class="add-fab" id="add-fab" onclick="openAddModal()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
+
+<!-- MODAL DAG/REMINDER -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title" id="modal-task-title">Nieuwe taak</div>
+    <div class="field">
+      <label>Titel</label>
+      <input type="text" id="t-title" placeholder="Wat moet je doen?">
+    </div>
+    <div class="field" id="f-date">
+      <label>Datum</label>
+      <input type="date" id="t-date">
+    </div>
+    <div class="field" id="f-recurring">
+      <label>Herhaling</label>
+      <select id="t-recurring">
+        <option value="none">Geen</option>
+        <option value="daily">Dagelijks</option>
+        <option value="weekly">Wekelijks (zelfde dag)</option>
+        <option value="monthly">Maandelijks</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Prioriteit</label>
+      <select id="t-priority">
+        <option value="normaal">Normaal</option>
+        <option value="hoog">Hoog</option>
+        <option value="laag">Laag</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Kleurlabel</label>
+      <div class="color-row" id="t-color-row"></div>
+    </div>
+    <div class="field">
+      <label>Notitie</label>
+      <textarea id="t-note" placeholder="Extra context..."></textarea>
+    </div>
+    <div class="field">
+      <label>Subtaken</label>
+      <div id="t-subtasks-list"></div>
+      <div class="subtask-add-row">
+        <input type="text" id="t-subtask-input" placeholder="Subtaak toevoegen...">
+        <button class="btn-sm" onclick="addSubtask()">+</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveTask()">Opslaan</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-task')">Annuleren</button>
+  </div>
+</div>
+
+<!-- MODAL DEADLINE -->
+<div class="modal-overlay" id="modal-deadline">
+  <div class="modal">
+    <div class="modal-title">Nieuwe deadline</div>
+    <div class="field">
+      <label>Titel</label>
+      <input type="text" id="d-title" placeholder="Wat moet af zijn?">
+    </div>
+    <div class="field">
+      <label>Deadline datum</label>
+      <input type="date" id="d-date">
+    </div>
+    <div class="field">
+      <label>Dagen van tevoren beginnen</label>
+      <input type="number" id="d-workdays" placeholder="bijv. 3" min="0" max="90">
+    </div>
+    <div class="field">
+      <label>Prioriteit</label>
+      <select id="d-priority">
+        <option value="normaal">Normaal</option>
+        <option value="hoog">Hoog</option>
+        <option value="laag">Laag</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Notitie</label>
+      <textarea id="d-note" placeholder="Extra context..."></textarea>
+    </div>
+    <div class="field">
+      <label>Subtaken</label>
+      <div id="d-subtasks-list"></div>
+      <div class="subtask-add-row">
+        <input type="text" id="d-subtask-input" placeholder="Subtaak toevoegen...">
+        <button class="btn-sm" onclick="addDeadlineSubtask()">+</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveDeadline()">Opslaan</button>
+    <button class="btn btn-ghost" onclick="closeModal('modal-deadline')">Annuleren</button>
+  </div>
+</div>
+
+<canvas class="confetti-canvas" id="confetti-canvas"></canvas>
+<div class="toast" id="toast"></div>
+<div class="xp-popup" id="xp-popup"></div>
+
+<script>
+const APP_VERSION = '1.0.0';
+
+// ---- COLORS ----
+const COLORS = ['#7c6fff','#ff6f91','#6fffc8','#fbbf24','#f87171','#60a5fa','#a78bfa','#34d399'];
+
+// ---- STATE ----
+let state = {
+  tasks: [],
+  deadlines: [],
+  reminders: [],
+  xp: 0,
+  reminderChecks: {}
+};
+
+let currentTab = 'dag';
+let editingId = null;
+let editingType = null;
+let tempSubtasks = [];
+let selectedColor = COLORS[0];
+
+// ---- STORAGE ----
+function save() { localStorage.setItem('taak_v1', JSON.stringify(state)); }
+function load() {
+  const d = localStorage.getItem('taak_v1');
+  if (d) state = { ...state, ...JSON.parse(d) };
+  // Check import from URL
+  const params = new URLSearchParams(location.search);
+  if (params.get('import')) {
+    try {
+      const imported = JSON.parse(atob(params.get('import')));
+      if (imported.tasks) state.tasks.push(...imported.tasks);
+      if (imported.deadlines) state.deadlines.push(...imported.deadlines);
+      if (imported.reminders) state.reminders.push(...imported.reminders);
+      save();
+      history.replaceState(null, '', location.pathname);
+      showToast('Taken geïmporteerd!');
+    } catch(e) {}
+  }
+  cleanReminderChecks();
+}
+
+function cleanReminderChecks() {
+  const today = todayStr();
+  const keys = Object.keys(state.reminderChecks);
+  keys.forEach(k => { if (!k.startsWith(today)) delete state.reminderChecks[k]; });
+  save();
+}
+
+// ---- UTILS ----
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  const days = ['zo','ma','di','wo','do','vr','za'];
+  const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  return `${days[dt.getDay()]} ${dt.getDate()} ${months[dt.getMonth()]}`;
+}
+function daysUntil(dateStr) {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const target = new Date(dateStr + 'T00:00:00');
+  return Math.round((target - now) / 86400000);
+}
+function countdownText(days) {
+  if (days < 0) return `${Math.abs(days)} dag${Math.abs(days)===1?'':'en'} verlopen`;
+  if (days === 0) return 'Vandaag!';
+  if (days === 1) return 'Morgen';
+  return `${days} dagen`;
+}
+function deadlineColor(days) {
+  if (days < 0) return 'dl-grey';
+  if (days <= 1) return 'dl-red';
+  if (days <= 7) return 'dl-orange';
+  return 'dl-green';
+}
+function deadlineTextColor(days) {
+  if (days < 0) return 'var(--text2)';
+  if (days <= 1) return 'var(--red)';
+  if (days <= 7) return 'var(--orange)';
+  return 'var(--green)';
+}
+
+// ---- RECURRING TASK CHECK ----
+function shouldShowTask(task) {
+  const today = todayStr();
+  if (!task.recurring || task.recurring === 'none') {
+    return task.date === today || (task.date < today && !task.done);
+  }
+  if (task.recurring === 'daily') return true;
+  if (task.recurring === 'weekly') {
+    const taskDay = new Date(task.date + 'T00:00:00').getDay();
+    const todayDay = new Date().getDay();
+    return taskDay === todayDay;
+  }
+  if (task.recurring === 'monthly') {
+    const taskDayOfMonth = new Date(task.date + 'T00:00:00').getDate();
+    return taskDayOfMonth === new Date().getDate();
+  }
+  return false;
+}
+
+// ---- DEADLINE WORK TASKS ----
+function getDeadlineWorkTasks() {
+  const today = todayStr();
+  return state.deadlines
+    .filter(d => {
+      if (!d.workdays || d.workdays <= 0) return false;
+      const startStr = getWorkStartDate(d.date, d.workdays);
+      return today >= startStr && today <= d.date;
+    })
+    .map(d => ({
+      id: 'dl_' + d.id,
+      title: `[Deadline] ${d.title}`,
+      fromDeadline: true,
+      deadlineDate: d.date,
+      priority: d.priority,
+      done: d.workDone || false,
+      dlId: d.id
+    }));
+}
+
+function getWorkStartDate(deadlineStr, days) {
+  const dt = new Date(deadlineStr + 'T00:00:00');
+  dt.setDate(dt.getDate() - days);
+  return dt.toISOString().slice(0,10);
+}
+
+// ---- RENDER ----
+function render() {
+  document.getElementById('xp-display').textContent = state.xp;
+  if (currentTab === 'dag') renderDag();
+  else if (currentTab === 'deadlines') renderDeadlines();
+  else renderReminders();
+}
+
+function renderDag() {
+  const el = document.getElementById('dag-content');
+  const today = todayStr();
+
+  // Gather all tasks that should appear today
+  let todayTasks = state.tasks.filter(t => shouldShowTask(t));
+  // Sort: expired first? No — future recurring on top, then expired undone
+  // Group by date for non-recurring
+  let grouped = {};
+
+  todayTasks.forEach(t => {
+    const key = (!t.recurring || t.recurring === 'none') ? (t.date || today) : today;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(t);
+  });
+
+  // Add deadline work tasks to today
+  const dlTasks = getDeadlineWorkTasks();
+
+  const sortedDates = Object.keys(grouped).sort();
+
+  if (sortedDates.length === 0 && dlTasks.length === 0) {
+    el.innerHTML = emptyState('Geen taken vandaag', 'Voeg een taak toe met de + knop');
+    return;
+  }
+
+  let html = '';
+
+  sortedDates.forEach(date => {
+    const tasks = grouped[date];
+    const isToday = date === today;
+    const isPast = date < today;
+    const label = isToday ? 'Vandaag' : (isPast ? formatDate(date) + ' — verlopen' : formatDate(date));
+    const done = tasks.filter(t => t.done).length;
+    const total = tasks.length;
+    const pct = total ? Math.round((done/total)*100) : 0;
+
+    html += `<div class="date-group">
+      <div class="date-label">${label}</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      ${tasks.map(t => renderTaskCard(t, date)).join('')}
+    </div>`;
+  });
+
+  // Deadline work tasks at bottom of today group
+  if (dlTasks.length > 0) {
+    html += `<div class="date-group">
+      <div class="date-label">Aankomende deadlines</div>
+      ${dlTasks.map(t => renderDeadlineWorkCard(t)).join('')}
+    </div>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function renderTaskCard(t, date) {
+  const isExpired = !t.recurring && t.date < todayStr() && !t.done;
+  const colorDot = t.color ? `<span class="color-label-dot" style="background:${t.color}"></span>` : '';
+
+  let subtasksHtml = '';
+  if (t.subtasks && t.subtasks.length > 0) {
+    subtasksHtml = `<div class="subtasks">${t.subtasks.map((s,i) => `
+      <div class="subtask-item">
+        <button class="subtask-check ${s.done?'checked':''}" onclick="toggleSubtask('${t.id}','${date}',${i})">
+          ${s.done ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+        </button>
+        <span class="subtask-label ${s.done?'done':''}">${s.title}</span>
+      </div>`).join('')}</div>`;
+  }
+
+  const noteHtml = t.note ? `<div class="task-note">${t.note}</div>` : '';
+  const recurBadge = t.recurring && t.recurring !== 'none' ? `<span class="recurring-badge">↻</span>` : '';
+  const expiredBadge = isExpired ? `<span class="expired-badge">verlopen</span>` : '';
+
+  return `<div class="task-card ${t.done?'done':''}" id="tc_${t.id}">
+    <div class="task-card-top">
+      <button class="check-btn ${t.done?'checked':''}" onclick="toggleTask('${t.id}','${date}')">
+        ${t.done ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+      </button>
+      <div class="task-info">
+        <div class="task-title">${colorDot}${t.title}</div>
+        <div class="task-meta">
+          <span class="tag priority-${t.priority||'normaal'}">${t.priority||'normaal'}</span>
+          ${recurBadge}${expiredBadge}
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="icon-btn" onclick="shareTask('${t.id}')" title="Delen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </button>
+        <button class="icon-btn" onclick="editTask('${t.id}')" title="Bewerken">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="deleteTask('${t.id}')" title="Verwijderen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </button>
+      </div>
+    </div>
+    ${noteHtml}${subtasksHtml}
+  </div>`;
+}
+
+function renderDeadlineWorkCard(t) {
+  const days = daysUntil(t.deadlineDate);
+  return `<div class="task-card from-deadline ${t.done?'done':''}">
+    <div class="task-card-top">
+      <button class="check-btn ${t.done?'checked':''}" onclick="toggleDeadlineWork('${t.dlId}')">
+        ${t.done ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+      </button>
+      <div class="task-info">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">
+          <span class="tag priority-${t.priority||'normaal'}">${t.priority||'normaal'}</span>
+          <span class="deadline-badge">deadline ${formatDate(t.deadlineDate)}</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDeadlines() {
+  const el = document.getElementById('deadline-content');
+  if (state.deadlines.length === 0) {
+    el.innerHTML = emptyState('Geen deadlines', 'Voeg een deadline toe met de + knop');
+    return;
+  }
+
+  const sorted = [...state.deadlines].sort((a,b) => a.date > b.date ? 1 : -1);
+  el.innerHTML = sorted.map(d => {
+    const days = daysUntil(d.date);
+    const colorClass = deadlineColor(days);
+    const textColor = deadlineTextColor(days);
+
+    let subtasksHtml = '';
+    if (d.subtasks && d.subtasks.length > 0) {
+      const done = d.subtasks.filter(s=>s.done).length;
+      subtasksHtml = `<div class="subtasks">${d.subtasks.map((s,i) => `
+        <div class="subtask-item">
+          <button class="subtask-check ${s.done?'checked':''}" onclick="toggleDeadlineSubtask('${d.id}',${i})">
+            ${s.done?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+          </button>
+          <span class="subtask-label ${s.done?'done':''}">${s.title}</span>
+        </div>`).join('')}
+        <div style="font-size:11px;color:var(--text2);margin-top:6px">${done}/${d.subtasks.length} subtaken</div>
+      </div>`;
+    }
+
+    const noteHtml = d.note ? `<div class="task-note">${d.note}</div>` : '';
+    const workInfo = d.workdays > 0 ? `<div class="deadline-workdays">📌 Begin ${d.workdays} dagen van tevoren (${formatDate(getWorkStartDate(d.date, d.workdays))})</div>` : '';
+
+    return `<div class="deadline-card">
+      <div class="deadline-bar ${colorClass}"></div>
+      <div class="deadline-top">
+        <div class="deadline-info">
+          <div class="deadline-title">${d.title}</div>
+          <div class="deadline-countdown" style="color:${textColor}">${countdownText(days)} — ${formatDate(d.date)}</div>
+          <div class="task-meta">
+            <span class="tag priority-${d.priority||'normaal'}">${d.priority||'normaal'}</span>
+          </div>
+          ${workInfo}
+        </div>
+        <div class="task-actions">
+          <button class="icon-btn" onclick="shareDeadline('${d.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </button>
+          <button class="icon-btn" onclick="editDeadline('${d.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn" onclick="deleteDeadline('${d.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+      ${noteHtml}${subtasksHtml}
+    </div>`;
+  }).join('');
+}
+
+function renderReminders() {
+  const el = document.getElementById('reminder-content');
+  if (state.reminders.length === 0) {
+    el.innerHTML = emptyState('Geen reminders', 'Voeg een dagelijkse reminder toe met de + knop');
+    return;
+  }
+
+  const today = todayStr();
+  el.innerHTML = state.reminders.map(r => {
+    const checkKey = today + '_' + r.id;
+    const checked = !!state.reminderChecks[checkKey];
+    const noteHtml = r.note ? `<div class="task-note">${r.note}</div>` : '';
+    let subtasksHtml = '';
+    if (r.subtasks && r.subtasks.length > 0) {
+      subtasksHtml = `<div class="subtasks">${r.subtasks.map((s,i) => `
+        <div class="subtask-item">
+          <button class="subtask-check ${s.done?'checked':''}" onclick="toggleReminderSubtask('${r.id}',${i})">
+            ${s.done?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+          </button>
+          <span class="subtask-label ${s.done?'done':''}">${s.title}</span>
+        </div>`).join('')}
+      </div>`;
+    }
+
+    return `<div class="task-card ${checked?'done':''}">
+      <div class="task-card-top">
+        <button class="check-btn ${checked?'checked':''}" onclick="toggleReminder('${r.id}')">
+          ${checked?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+        </button>
+        <div class="task-info">
+          <div class="task-title">${r.title}</div>
+          <div class="task-meta">
+            <span class="tag priority-${r.priority||'normaal'}">${r.priority||'normaal'}</span>
+            <span class="recurring-badge">dagelijks</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="icon-btn" onclick="editReminder('${r.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn" onclick="deleteReminder('${r.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+      ${noteHtml}${subtasksHtml}
+    </div>`;
+  }).join('');
+}
+
+function emptyState(title, sub) {
+  return `<div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <p style="font-weight:600;color:var(--text);margin-bottom:6px">${title}</p>
+    <p>${sub}</p>
+  </div>`;
+}
+
+// ---- TAB SWITCH ----
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  render();
+}
+
+// ---- MODAL ----
+function openAddModal() {
+  if (currentTab === 'dag') openTaskModal();
+  else if (currentTab === 'deadlines') openDeadlineModal();
+  else openReminderModal();
+}
+
+function openTaskModal(type) {
+  editingId = null;
+  editingType = type || currentTab;
+  tempSubtasks = [];
+  selectedColor = COLORS[0];
+
+  const isReminder = editingType === 'reminders';
+  document.getElementById('modal-task-title').textContent = isReminder ? 'Nieuwe reminder' : 'Nieuwe taak';
+  document.getElementById('f-date').style.display = isReminder ? 'none' : '';
+  document.getElementById('f-recurring').style.display = isReminder ? 'none' : '';
+  document.getElementById('t-title').value = '';
+  document.getElementById('t-date').value = todayStr();
+  document.getElementById('t-recurring').value = 'none';
+  document.getElementById('t-priority').value = 'normaal';
+  document.getElementById('t-note').value = '';
+  document.getElementById('t-subtask-input').value = '';
+  renderColorRow('t-color-row', COLORS, selectedColor, (c) => { selectedColor = c; });
+  renderSubtasksList('t-subtasks-list', tempSubtasks, 'task');
+  pushHistory('modal-task');
+  document.getElementById('modal-task').classList.add('open');
+}
+
+function openReminderModal() { openTaskModal('reminders'); }
+
+function openDeadlineModal() {
+  editingId = null;
+  tempSubtasks = [];
+  document.getElementById('d-title').value = '';
+  document.getElementById('d-date').value = '';
+  document.getElementById('d-workdays').value = '';
+  document.getElementById('d-priority').value = 'normaal';
+  document.getElementById('d-note').value = '';
+  document.getElementById('d-subtask-input').value = '';
+  renderSubtasksList('d-subtasks-list', tempSubtasks, 'deadline');
+  pushHistory('modal-deadline');
+  document.getElementById('modal-deadline').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function renderColorRow(containerId, colors, selected, onSelect) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = colors.map(c => `
+    <div class="color-dot ${c===selected?'selected':''}" style="background:${c}" onclick="selectColor('${containerId}','${c}')"></div>
+  `).join('') + `<input type="color" id="${containerId}-custom" style="width:28px;height:28px;border:none;background:none;cursor:pointer;padding:0;border-radius:50%;overflow:hidden" title="Eigen kleur" onchange="selectCustomColor('${containerId}', this.value)">`;
+}
+
+function selectColor(containerId, color) {
+  selectedColor = color;
+  renderColorRow(containerId, COLORS, selectedColor, ()=>{});
+}
+
+function selectCustomColor(containerId, color) {
+  selectedColor = color;
+  renderColorRow(containerId, COLORS, selectedColor, ()=>{});
+}
+
+function renderSubtasksList(containerId, subtasks, type) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = subtasks.map((s,i) => `
+    <div class="subtask-item">
+      <span class="subtask-label">${s.title}</span>
+      <button class="icon-btn" onclick="removeSubtask(${i},'${type}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addSubtask() {
+  const inp = document.getElementById('t-subtask-input');
+  if (!inp.value.trim()) return;
+  tempSubtasks.push({ title: inp.value.trim(), done: false });
+  inp.value = '';
+  renderSubtasksList('t-subtasks-list', tempSubtasks, 'task');
+}
+
+function addDeadlineSubtask() {
+  const inp = document.getElementById('d-subtask-input');
+  if (!inp.value.trim()) return;
+  tempSubtasks.push({ title: inp.value.trim(), done: false });
+  inp.value = '';
+  renderSubtasksList('d-subtasks-list', tempSubtasks, 'deadline');
+}
+
+function removeSubtask(i, type) {
+  tempSubtasks.splice(i, 1);
+  if (type === 'deadline') renderSubtasksList('d-subtasks-list', tempSubtasks, 'deadline');
+  else renderSubtasksList('t-subtasks-list', tempSubtasks, 'task');
+}
+
+// ---- SAVE ----
+function saveTask() {
+  const title = document.getElementById('t-title').value.trim();
+  if (!title) return;
+  const isReminder = editingType === 'reminders';
+
+  if (editingId) {
+    if (isReminder) {
+      const r = state.reminders.find(r => r.id === editingId);
+      if (r) {
+        r.title = title;
+        r.priority = document.getElementById('t-priority').value;
+        r.note = document.getElementById('t-note').value.trim();
+        r.subtasks = tempSubtasks;
+        r.color = selectedColor;
+      }
+    } else {
+      const t = state.tasks.find(t => t.id === editingId);
+      if (t) {
+        t.title = title;
+        t.date = document.getElementById('t-date').value;
+        t.recurring = document.getElementById('t-recurring').value;
+        t.priority = document.getElementById('t-priority').value;
+        t.note = document.getElementById('t-note').value.trim();
+        t.subtasks = tempSubtasks;
+        t.color = selectedColor;
+      }
+    }
+  } else {
+    const obj = {
+      id: uid(),
+      title,
+      priority: document.getElementById('t-priority').value,
+      note: document.getElementById('t-note').value.trim(),
+      subtasks: [...tempSubtasks],
+      color: selectedColor,
+      done: false
+    };
+    if (isReminder) {
+      state.reminders.push(obj);
+    } else {
+      obj.date = document.getElementById('t-date').value;
+      obj.recurring = document.getElementById('t-recurring').value;
+      state.tasks.push(obj);
+    }
+  }
+
+  save();
+  closeModal('modal-task');
+  render();
+}
+
+function saveDeadline() {
+  const title = document.getElementById('d-title').value.trim();
+  const date = document.getElementById('d-date').value;
+  if (!title || !date) return;
+
+  const obj = {
+    id: editingId || uid(),
+    title,
+    date,
+    workdays: parseInt(document.getElementById('d-workdays').value) || 0,
+    priority: document.getElementById('d-priority').value,
+    note: document.getElementById('d-note').value.trim(),
+    subtasks: [...tempSubtasks],
+    workDone: false
+  };
+
+  if (editingId) {
+    const idx = state.deadlines.findIndex(d => d.id === editingId);
+    if (idx > -1) state.deadlines[idx] = { ...state.deadlines[idx], ...obj };
+  } else {
+    state.deadlines.push(obj);
+  }
+
+  save();
+  closeModal('modal-deadline');
+  render();
+}
+
+// ---- EDIT ----
+function editTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  editingId = id;
+  editingType = 'dag';
+  tempSubtasks = [...(t.subtasks || [])];
+  selectedColor = t.color || COLORS[0];
+  document.getElementById('modal-task-title').textContent = 'Taak bewerken';
+  document.getElementById('f-date').style.display = '';
+  document.getElementById('f-recurring').style.display = '';
+  document.getElementById('t-title').value = t.title;
+  document.getElementById('t-date').value = t.date;
+  document.getElementById('t-recurring').value = t.recurring || 'none';
+  document.getElementById('t-priority').value = t.priority || 'normaal';
+  document.getElementById('t-note').value = t.note || '';
+  renderColorRow('t-color-row', COLORS, selectedColor, ()=>{});
+  renderSubtasksList('t-subtasks-list', tempSubtasks, 'task');
+  pushHistory('modal-task');
+  document.getElementById('modal-task').classList.add('open');
+}
+
+function editReminder(id) {
+  const r = state.reminders.find(r => r.id === id);
+  if (!r) return;
+  editingId = id;
+  editingType = 'reminders';
+  tempSubtasks = [...(r.subtasks || [])];
+  selectedColor = r.color || COLORS[0];
+  document.getElementById('modal-task-title').textContent = 'Reminder bewerken';
+  document.getElementById('f-date').style.display = 'none';
+  document.getElementById('f-recurring').style.display = 'none';
+  document.getElementById('t-title').value = r.title;
+  document.getElementById('t-priority').value = r.priority || 'normaal';
+  document.getElementById('t-note').value = r.note || '';
+  renderColorRow('t-color-row', COLORS, selectedColor, ()=>{});
+  renderSubtasksList('t-subtasks-list', tempSubtasks, 'task');
+  pushHistory('modal-task');
+  document.getElementById('modal-task').classList.add('open');
+}
+
+function editDeadline(id) {
+  const d = state.deadlines.find(d => d.id === id);
+  if (!d) return;
+  editingId = id;
+  tempSubtasks = [...(d.subtasks || [])];
+  document.getElementById('d-title').value = d.title;
+  document.getElementById('d-date').value = d.date;
+  document.getElementById('d-workdays').value = d.workdays || '';
+  document.getElementById('d-priority').value = d.priority || 'normaal';
+  document.getElementById('d-note').value = d.note || '';
+  renderSubtasksList('d-subtasks-list', tempSubtasks, 'deadline');
+  pushHistory('modal-deadline');
+  document.getElementById('modal-deadline').classList.add('open');
+}
+
+// ---- DELETE ----
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  save(); render();
+}
+
+function deleteDeadline(id) {
+  state.deadlines = state.deadlines.filter(d => d.id !== id);
+  save(); render();
+}
+
+function deleteReminder(id) {
+  state.reminders = state.reminders.filter(r => r.id !== id);
+  save(); render();
+}
+
+// ---- TOGGLE ----
+function toggleTask(id, date) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  save();
+
+  if (t.done) {
+    addXP(10);
+    checkDayComplete(date);
+  }
+  render();
+}
+
+function toggleReminder(id) {
+  const today = todayStr();
+  const key = today + '_' + id;
+  state.reminderChecks[key] = !state.reminderChecks[key];
+  if (state.reminderChecks[key]) addXP(5);
+  save(); render();
+}
+
+function toggleDeadlineWork(dlId) {
+  const d = state.deadlines.find(d => d.id === dlId);
+  if (!d) return;
+  d.workDone = !d.workDone;
+  if (d.workDone) addXP(8);
+  save(); render();
+}
+
+function toggleSubtask(taskId, date, idx) {
+  const t = state.tasks.find(t => t.id === taskId);
+  if (!t || !t.subtasks) return;
+  t.subtasks[idx].done = !t.subtasks[idx].done;
+  if (t.subtasks[idx].done) addXP(3);
+  save(); render();
+}
+
+function toggleDeadlineSubtask(dlId, idx) {
+  const d = state.deadlines.find(d => d.id === dlId);
+  if (!d || !d.subtasks) return;
+  d.subtasks[idx].done = !d.subtasks[idx].done;
+  if (d.subtasks[idx].done) addXP(3);
+  save(); render();
+}
+
+function toggleReminderSubtask(remId, idx) {
+  const r = state.reminders.find(r => r.id === remId);
+  if (!r || !r.subtasks) return;
+  r.subtasks[idx].done = !r.subtasks[idx].done;
+  if (r.subtasks[idx].done) addXP(3);
+  save(); render();
+}
+
+function checkDayComplete(date) {
+  const dayTasks = state.tasks.filter(t =>
+    (!t.recurring || t.recurring === 'none') ? t.date === date : shouldShowTask(t)
+  );
+  if (dayTasks.length > 0 && dayTasks.every(t => t.done)) {
+    setTimeout(() => launchConfetti(), 200);
+    addXP(20);
+    showToast('🎉 Alle taken van de dag gedaan! +20 XP');
+  }
+}
+
+// ---- XP ----
+function addXP(amount) {
+  state.xp += amount;
+  save();
+  showXPPopup('+' + amount + ' XP');
+  document.getElementById('xp-display').textContent = state.xp;
+}
+
+function showXPPopup(text) {
+  const el = document.getElementById('xp-popup');
+  el.textContent = text;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ---- SHARE ----
+function shareTask(id) {
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  const data = btoa(JSON.stringify({ tasks: [{ ...t, id: uid() }] }));
+  const url = location.origin + location.pathname + '?import=' + data;
+  navigator.clipboard.writeText(url).then(() => showToast('Link gekopieerd!'));
+}
+
+function shareDeadline(id) {
+  const d = state.deadlines.find(d => d.id === id);
+  if (!d) return;
+  const data = btoa(JSON.stringify({ deadlines: [{ ...d, id: uid() }] }));
+  const url = location.origin + location.pathname + '?import=' + data;
+  navigator.clipboard.writeText(url).then(() => showToast('Link gekopieerd!'));
+}
+
+// ---- TOAST ----
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ---- CONFETTI ----
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = Array.from({length: 80}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    vx: (Math.random() - 0.5) * 3,
+    vy: Math.random() * 4 + 2,
+    rot: Math.random() * 360,
+    vr: (Math.random() - 0.5) * 5
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    });
+    frame++;
+    if (frame < 120) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+// ---- ANDROID BACK BUTTON ----
+function pushHistory(modal) {
+  history.pushState({ modal }, '');
+}
+
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.modal) {
+    document.getElementById(e.state.modal).classList.remove('open');
+  }
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      history.back();
+    }
+  });
+});
+
+// Enter key for subtask inputs
+document.getElementById('t-subtask-input').addEventListener('keydown', e => { if(e.key==='Enter') addSubtask(); });
+document.getElementById('d-subtask-input').addEventListener('keydown', e => { if(e.key==='Enter') addDeadlineSubtask(); });
+
+// ---- INIT ----
+load();
+render();
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
